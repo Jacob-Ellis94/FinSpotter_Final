@@ -1,0 +1,499 @@
+
+# The Kivy language is relatively straightforward, and functions much like CSS does for websites. It is a declarative
+# language. Much of this is fairly readable, though I have included comments for explaining some of the
+# functionality.
+
+
+WindowManager:
+    WelcomeWindow:
+    MainWindow:
+    AnalysisWindow:
+    OutputWindow:
+    GraphWindow_top:
+    GraphWindow_bottom:
+    LoadingWindow:
+
+<WelcomeWindow>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'light.jpg'
+    name:"welcome"
+
+    GridLayout:
+        cols: 1
+        GridLayout:
+            rows: 4
+            Label:
+                text: "    "
+            Label:
+                pos_hint: {"x": .2, "top":.3}
+                size_hint: 1,1
+                font_size: sp(50)
+                text: "Welcome to Finspotter"
+                font_name: 'Monoton'
+            Label:
+                text:""
+
+            BoxLayout:
+                size_hint_y: None
+                size_hint_x: 1
+                height: 100
+                orientation: 'vertical'
+
+                Label:
+                    font_name: 'Roboto'
+                    text_size: root.width, 350
+                    size: self.texture_size
+                    font_size: 17
+
+                    text:
+                        "    FinSpotter is a program designed as a means of learning and implementing some of the \
+                        fundemental      \n    techniques involved in Natural Language Processing.   \
+                        FinSpotter uses a webcrawler to extract text   \n    from financial news blogs, and processes this \
+                        to output a summary of the sentiment toward all \n    companies which feature in these blogs.\n \n         \
+                        There are three main stages in this process: \n \n                            \
+                        1) Webcrawling and text extraction. \n                            \
+                        2) Named Entity Recognition, where companies within the text are identified. \n                            \
+                        3) Outputing a report for the companies mentioned."
+        GridLayout:
+            cols:2
+            rows:1
+        Button:
+            font_name: 'Oswald'
+            text: "Enter Program"
+            font_size: sp(30)
+            size_hint: .4,.4
+            on_release:
+                app.root.current = "analysis" #Primary method for changing screens seen here, will be throughout.
+                root.manager.transition.direction = "left"
+
+
+        Button:
+            text: "Exit program"
+            on_press: app.get_running_app().stop() #Gives user option to terminate program
+            size_hint: .3,.3
+            font_size: sp(20)
+
+<AnalysisWindow>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'light.jpg'
+    name: "analysis"
+
+    GridLayout:
+        cols: 1
+
+        BoxLayout:
+            orientation: 'vertical'
+
+            Label:
+                text: "Summary of process:"
+                font_size: 50
+                font_name: 'Monoton'
+
+            Label:
+                text: " \n \n "
+
+            Label:
+                text: "\n\n\n\n"
+
+            Label:
+                text:
+                    "  \n \n 1) Parse 100 articles from a range of financial news sites \n (Motley Fool, \
+                    UK Investor, Investing.com, and Stock Brokerage) \n \n 2) Search for company names and extract \
+                    sentences \n   (matched against 2000 companies) \n \n \
+                    3) Produce a report showing sentiment scores alongside companies identified\n \n\
+                    (Process may take longer if files need to populate completely from scratch)"
+
+
+                font_name: 'Oswald'
+                font_size: 25
+
+
+        GridLayout:
+            cols:1
+            rows:3
+        Button:
+            text: "Begin Analysis"
+            font_size: sp(25)
+            on_release:
+                #Here is where the function to run the full backend process resides. (See AnalysisWindow class in .py)
+                root.executeFunc()
+                app.root.current = "Loading"
+                root.manager.transition.direction = "left"
+                on_press: print("ANALYSIS FUNCTION EXECUTING") #Used for charting process in console
+            size_hint: .4,.4
+
+
+        Button:
+            text: "Go Back"
+            font_size: sp(18)
+
+            on_release:
+                app.root.current = "welcome"
+                root.manager.transition
+                root.manager.transition.direction = "right"
+            size_hint: .25,.25
+
+
+#:import Factory kivy.factory.Factory
+<LoadingWindow>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'light.jpg'
+    name: 'Loading'
+    on_enter:
+        Factory.LoadingBar().open()
+    BoxLayout:
+        orientation: 'vertical'
+        pos_hint: {"x": .5, "top":1}
+        CircularArrow:
+        Label:
+            text: "      "
+            font_size: sp(30)
+
+
+
+#:import rect cmath.rect
+#:import radians math.radians
+<CircularArrow>:
+    line_width: 5
+    radius: 75
+    x: root.radius + root.line_width * 3
+    y: root.radius + root.line_width * 3
+    astart: 90
+    aend: 270
+    arrow_x1: rect(root.radius + 5, radians(-root.aend + 90)).real + root.x
+    arrow_y1: rect(root.radius + 5, radians(-root.aend + 90)).imag + root.y
+    arrow_x2: rect(root.radius - 5, radians(-root.aend + 90)).real + root.x
+    arrow_y2: rect(root.radius - 5, radians(-root.aend + 90)).imag + root.y
+    arrow_x3: rect(root.radius, radians(-root.aend - 5 + 90)).real + root.x
+    arrow_y3: rect(root.radius, radians(-root.aend - 5 + 90)).imag + root.y
+    arrow_head: [root.arrow_x1, root.arrow_y1, root.arrow_x2, root.arrow_y2, root.arrow_x3, root.arrow_y3]
+    canvas.after:
+        Color:
+            rgba: 0.8,1,0.9,1
+        Line:
+            width: root.line_width
+            circle: (root.x, root.y, root.radius, root.astart, root.aend)
+        Line:
+            width: 5
+            joint: "miter"
+            close: True
+            points: root.arrow_head or []
+
+
+<OutputWindow>
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'light.jpg'
+    name: "output"
+    BoxLayout:
+        orientation: "vertical"
+        RV:
+            id: rv
+
+        GridLayout:
+            cols:3
+            size_hint_x:1
+            size_hint_y: .15
+            Button:
+                text: 'Previous screen'
+                font_size: sp(20)
+                on_release:
+                    app.root.current = "analysis"
+                    root.manager.transition.direction = "right"
+            HelpButton:
+                text: 'Help'
+                font_size: sp(20)
+
+            Button:
+                text: "Visualise top ten"
+                font_size: sp(20)
+                on_release:
+                    root.make_graph() # Here is where the bar graph function is triggered
+                    app.root.current = "graph_top"
+                    root.manager.transition.direction = "left"
+
+
+<GraphWindow_top>
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'light.jpg'
+    name: "graph_top"
+
+    FloatLayout:
+        pos_hint: {"x": 0.2, "y": 0.5}
+        MyImageWidget:
+            size:root.size
+
+
+    GridLayout:
+        cols:2
+        size_hint_x:1
+        size_hint_y: .15
+        Button:
+            text: 'Previous screen'
+            font_size: sp(20)
+            on_release:
+                app.root.current = "output"
+                root.manager.transition.direction = "right"
+
+        Button:
+            text: 'Bottom ten companies'
+            font_size: sp(20)
+            on_release:
+                root.make_graph()
+                app.root.current = "graph_bottom"
+                root.manager.transition.direction = "left"
+
+<GraphWindow_bottom>
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'light.jpg'
+    name: "graph_bottom"
+
+    FloatLayout:
+        pos_hint: {"x": 0.2, "y": 0.5}
+        MyImageWidget2:
+            size:root.size
+
+
+    GridLayout:
+        cols:2
+        size_hint_x:1
+        size_hint_y: .15
+        Button:
+            text: 'Previous screen'
+            font_size: sp(20)
+            on_release:
+                app.root.current = "graph_top"
+                root.manager.transition.direction = "right"
+
+
+
+<MyImageWidget2>
+<MyImageWidget>
+
+#:import F kivy.factory.Factory
+
+<RecycleViewRow>:
+    orientation: 'horizontal'
+    Label:
+        text_size: self.width, None
+        text: root.companyName
+        font_size: sp(18)
+
+    Row:
+    URLRow:
+    Label:
+        text: root.microAvg
+        font_size: sp(20)
+    Label:
+        text: root.macroAvg
+        font_size: sp(20)
+
+
+<RV>:
+    #id: rv
+    data: app.data
+    viewclass: 'RecycleViewRow'
+    RecycleBoxLayout:
+        padding: 20
+        orientation: 'vertical'
+        size_hint_y: None
+        height: self.minimum_height
+        default_size_hint: 1, None
+        default_size: 0, 50
+
+
+<PopupRVRow>:
+    #text_size: self.width, None
+    #size_hint: 1, None
+    #height: self.texture_size[1]*1.5
+    #pos_hint: {"x": 0.1, "y": 0.5}
+    spacing: 50
+
+    halign: "center"
+    orientation: 'horizontal'
+
+    Label:
+        text: root.text
+        text_size: root.width/2, None
+        height: self.texture_size[1]*1.5
+        font_size: sp(16)
+
+    Label:
+        text_size: root.width/2, None
+        height: self.texture_size[1]*1.5
+        markup: True
+        underline: True
+        font_size: sp(18)
+        text: root.score
+        size_hint: .2,1
+
+<Row@Button>: #These rows hold data for specific companies, hopefully readable enough.
+    text: "Sentences"
+    font_size: sp(18)
+    idx: self.parent.idx
+    on_press:
+        rv = self.parent.parent.parent
+        item = rv.data[self.idx]
+        popup = F.DataPopup(title=item['companyName'], sentences=item['sentences'], target_idx=self.idx)
+        popup.open()
+
+<DataPopup>:
+     # auto_dismiss: False
+    target_idx: 0
+    target_rv: None
+    size_hint: 1,.7
+    BoxLayout:
+        #pos_hint: {"x": 0.1, "y": 0}
+
+        orientation: 'vertical'
+        RecycleView:
+            pos_x: 100
+            data: [{'text': str(sentences[0]), 'score': str(sentences[1])} for sentences in root.sentences]
+            viewclass: 'PopupRVRow'
+            RecycleBoxLayout:
+                pos_hint: 1,1
+                padding: 20
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                default_size_hint: 1, None
+                default_size: 0, 100
+
+        Button:
+            size_hint: .25, 0.1
+            text: 'OK'
+            on_press: root.dismiss()
+
+
+
+
+<URLPopup>:
+    # auto_dismiss: False
+    target_idx: 0
+    target_rv: None
+    size_hint: 1,.7
+    BoxLayout:
+        orientation: 'vertical'
+        RecycleView:
+            data: [{'text': str(URL[0]), 'link': str(URL[1])} for URL in root.URLs]
+            viewclass: 'URLPopupRVRow'
+            RecycleBoxLayout:
+
+                padding: 25
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                default_size_hint: 1, None
+                default_size: 0, 100
+
+        Button:
+            size_hint: .25, 0.1
+            text: 'OK'
+            on_press: root.dismiss()
+
+
+
+
+<URLRow@Button>:
+    text: "Articles"
+    font_size: sp(18)
+    idx: self.parent.idx
+    on_press:
+        rv = self.parent.parent.parent
+        item = rv.data[self.idx]
+        popup = F.URLPopup(title=item['companyName'], URLs=item['URLs'], target_idx=self.idx)
+        popup.open()
+
+<URLPopupRVRow>:
+    text_size: self.width, None
+    size_hint: 1, None
+    #height: self.texture_size[1]*1.5
+    #pos_hint: {"x": 0.1, "y": 0.5}
+    spacing: 50
+
+    halign: "center"
+    orientation: 'horizontal'
+    Label:
+        text: root.text
+        text_size: self.width, None
+        height: self.texture_size[1]*1.5
+        font_size: sp(16)
+
+    Label:
+        text_size: self.width, None
+        height: self.texture_size[1]*1.5
+        markup: True
+        underline: True
+        font_size: sp(18)
+        color: 0.5,1,0,0.5
+        text: '[ref=some]Click here to access article[/ref]'
+        on_ref_press:
+            import webbrowser
+            webbrowser.open(root.link)
+
+
+
+
+<HelpButton@Button>:
+    text: "Help"
+    font_size: sp(20)
+    on_press:
+        popup = F.HelpPopup()
+        popup.open()
+
+<HelpPopup>:
+    title: 'Help'
+    size_hint: .7,.7
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+
+        Label:
+            text_size: self.width, None
+            font_size: sp(20)
+            text: "Here is some information on the values you can see in the output report: "
+
+
+        Label:
+            text_size: self.width, None
+            text: "Micro Average = The sum of all article level sentiment scores / number of articles"
+            color: 0.2, 1, 0.5, 1
+            font_size: sp(20)
+            hallign: 'center'
+
+        Label:
+            text_size: self.width, None
+            text: "Macro Average = The sum of all sentence sentiment scores from ALL articles / number of sentences from ALL articles"
+            color: 0.9, 1, 0.3, 1
+            font_size: sp(20)
+
+        Label:
+            text_size: self.width, None
+            text: "Sentences = Shows a list of all processed sentences for a company, with sentiment score"
+            color: 0.9, 1, 1, 1
+            font_size: sp(20)
+
+        Label:
+            text_size: self.width, None
+            text: "Articles = Shows a list of the articles processed, with title and link to visit"
+            color: 0.9, 1, 0.6, 1
+            font_size: sp(20)
+
+
